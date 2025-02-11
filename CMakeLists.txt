@@ -74,6 +74,7 @@ cpr_option(CPR_DEBUG_SANITIZER_FLAG_ADDR "Enables the AddressSanitizer for debug
 cpr_option(CPR_DEBUG_SANITIZER_FLAG_LEAK "Enables the LeakSanitizer for debug builds." OFF)
 cpr_option(CPR_DEBUG_SANITIZER_FLAG_UB "Enables the UndefinedBehaviorSanitizer for debug builds." OFF)
 cpr_option(CPR_DEBUG_SANITIZER_FLAG_ALL "Enables all sanitizers for debug builds except the ThreadSanitizer since it is incompatible with the other sanitizers." OFF)
+cpr_option(CPR_DEBUG_LOG_TLS_SECRETS "Enables logging of TLS secrets to stderr for debugging purposes." OFF)
 message(STATUS "=======================================================")
 
 # Save the project version as txt file for deb and NuGet builds

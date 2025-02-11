@@ -76,6 +76,18 @@ CURLcode sslctx_function_load_ca_cert_from_buffer(CURL* /*curl*/, void* sslctx, 
         return CURLE_ABORTED_BY_CALLBACK;
     }
 
+#ifdef CPR_DEBUG_LOG_TLS_SECRETS // cpr build flag for logging (default off)
+    SSL_CTX_set_keylog_callback((SSL_CTX*) sslctx, [](const SSL* ssl, const char* line) {
+        (void) ssl;
+        std::cerr << "TLS secrets: " << line << '\n';
+    });
+#ifdef HAVE_KEYLOG_CALLBACK
+    SSL_CTX_set_keylog_callback(sslctx, [](const SSL* ssl, const char* line) { std::cerr << "TLS secrets: " << line << '\n'; });
+#else
+// #error "CPR_DEBUG_LOG_TLS_SECRETS is defined but not implemented for this ssl library"
+#endif
+#endif
+
     // Get a pointer to the current certificate verification storage
     auto* store = SSL_CTX_get_cert_store(static_cast<SSL_CTX*>(sslctx));
 
