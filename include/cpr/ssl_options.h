@@ -66,6 +66,9 @@
 #ifndef SUPPORT_CURLOPT_SSL_CTX_FUNCTION
 #define SUPPORT_CURLOPT_SSL_CTX_FUNCTION LIBCURL_VERSION_NUM >= 0x070B00 // 7.11.0
 #endif
+// #define XSSTR(x) SSTR(x)
+// #define SSTR(x) #x
+// #pragma message("SIMON: LIBCURL_VERSION_NUM: " XSSTR(LIBCURL_VERSION_NUM))
 
 namespace cpr {
 

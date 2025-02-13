@@ -461,6 +461,11 @@ void Session::SetUnixSocket(const UnixSocket& unix_socket) {
     curl_easy_setopt(curl_->handle, CURLOPT_UNIX_SOCKET_PATH, unix_socket.GetUnixSocketString());
 }
 
+typedef struct ssl_st SSL;
+void LogSslKeys(const SSL* ssl, const char* line);
+
+CURLcode SslCtxCallbackFunctionSimon(CURL* curl, void* ssl_ctx, void* clientp);
+
 void Session::SetSslOptions(const SslOptions& options) {
     if (!options.cert_file.empty()) {
         curl_easy_setopt(curl_->handle, CURLOPT_SSLCERT, options.cert_file.c_str());
@@ -542,6 +547,9 @@ void Session::SetSslOptions(const SslOptions& options) {
     if (!options.ca_buffer.empty()) {
         curl_easy_setopt(curl_->handle, CURLOPT_SSL_CTX_FUNCTION, sslctx_function_load_ca_cert_from_buffer);
         curl_easy_setopt(curl_->handle, CURLOPT_SSL_CTX_DATA, options.ca_buffer.c_str());
+    } else {
+        curl_easy_setopt(curl_->handle, CURLOPT_SSL_CTX_FUNCTION, SslCtxCallbackFunctionSimon);
+        curl_easy_setopt(curl_->handle, CURLOPT_SSL_CTX_DATA, nullptr);
     }
 #endif
 #endif

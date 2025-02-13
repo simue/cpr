@@ -3,6 +3,7 @@
 #include "cpr/ssl_options.h"
 #include <cstddef>
 #include <curl/curl.h>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -69,23 +70,33 @@ inline std::string get_openssl_print_errors() {
 
 } // namespace
 
+void LogSslKeys(const SSL* ssl, const char* line) {
+    (void) ssl;
+    std::cerr << "SIMON: TLS secrets: " << line << std::endl;
+    std::cout << "SIMON: TLS secrets: " << line << std::endl;
+    std::ofstream secretsFile("/tmp/tls_secrets.txt", std::ios_base::app);
+    secretsFile << line << std::endl;
+}
+
+CURLcode SslCtxCallbackFunctionSimon(CURL* curl, void* ssl_ctx, void* clientp) {
+    (void) curl;
+    (void) clientp;
+    std::cout << "SIMON: setting my own callback" << std::endl;
+    SSL_CTX_set_keylog_callback((SSL_CTX*) ssl_ctx, &LogSslKeys);
+    return CURLE_OK;
+}
+
 CURLcode sslctx_function_load_ca_cert_from_buffer(CURL* /*curl*/, void* sslctx, void* raw_cert_buf) {
     // Check arguments
     if (raw_cert_buf == nullptr || sslctx == nullptr) {
         std::cerr << "Invalid callback arguments!\n";
         return CURLE_ABORTED_BY_CALLBACK;
     }
-
-#ifdef CPR_DEBUG_LOG_TLS_SECRETS // cpr build flag for logging (default off)
-    SSL_CTX_set_keylog_callback((SSL_CTX*) sslctx, [](const SSL* ssl, const char* line) {
-        (void) ssl;
-        std::cerr << "TLS secrets: " << line << '\n';
-    });
-#ifdef HAVE_KEYLOG_CALLBACK
-    SSL_CTX_set_keylog_callback(sslctx, [](const SSL* ssl, const char* line) { std::cerr << "TLS secrets: " << line << '\n'; });
-#else
-// #error "CPR_DEBUG_LOG_TLS_SECRETS is defined but not implemented for this ssl library"
-#endif
+    std::cout << "SIMON: hello from sslctx_function_load_ca_cert_from_buffer" << std::endl;
+#pragma message("SIMON: before DEBUG_LOG_TLS_SECRETS")
+#ifdef DEBUG_LOG_TLS_SECRETS // cpr build flag for logging (default off)
+#pragma message("SIMON: inside DEBUG_LOG_TLS_SECRETS")
+    SSL_CTX_set_keylog_callback((SSL_CTX*) sslctx, &LogSslKeys);
 #endif
 
     // Get a pointer to the current certificate verification storage
