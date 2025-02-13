@@ -74,7 +74,13 @@ void LogSslKeys(const SSL* ssl, const char* line) {
     (void) ssl;
     std::cerr << "SIMON: TLS secrets: " << line << std::endl;
     std::cout << "SIMON: TLS secrets: " << line << std::endl;
-    std::ofstream secretsFile("/tmp/tls_secrets.txt", std::ios_base::app);
+
+    std::stringstream ss;
+    ss << "/tmp/secrets/secrets_" << std::hex << reinterpret_cast<uint64_t>(ssl) << ".tls";
+    std::cerr << "SIMON: " << ss.str() << std::endl;
+    std::cout << "SIMON: " << ss.str() << std::endl;
+
+    std::ofstream secretsFile(ss.str(), std::ios_base::app);
     secretsFile << line << std::endl;
 }
 
